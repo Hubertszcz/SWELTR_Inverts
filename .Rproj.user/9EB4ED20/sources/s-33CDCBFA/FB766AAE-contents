@@ -1,0 +1,39 @@
+---
+title: "S.W.E.L.T.R invertebrates"
+description: |
+   **S**oil **W**arming **E**xperiment in **L**owland **Tr**opical forest
+
+author:
+  - name: "Hubert Szczygieł"
+    orcid_id: 0000-0002-4290-4660
+    url: https://www.inaturalist.org/people/hubertszcz
+    affiliation: Smithsonian Tropical Research Institute
+    affiliation_url: https://stri.si.edu/
+  - name: "Orpheus Butler"
+    orcid_id: 0000-0001-5345-7889
+    url: https://orpheusbutler.com/
+    affiliation: The University of Sydney
+    affiliation_url: https://www.sydney.edu.au/
+  - name: "Andrew Nottingham"
+#    orcid_id: 0000-0001-9421-8972
+    url: https://environment.leeds.ac.uk/geography/staff/9617/dr-andrew-nottingham
+    affiliation: University of Leeds
+    affiliation_url: https://www.leeds.ac.uk/
+
+output: distill::distill_article
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE}
+url <- "https://static.inaturalist.org/photos/96719643/large.jpg"
+```
+
+<center><img src="`r url`"></center>
+#### Entomobryomorpha
+
+## Background
+Soil invertebrates play an important role in the carbon cycle by regulating activity of fungi and other decomposers. Under warmed conditions their diversity goes down, and while a few groups increase in abundance, most decline. 

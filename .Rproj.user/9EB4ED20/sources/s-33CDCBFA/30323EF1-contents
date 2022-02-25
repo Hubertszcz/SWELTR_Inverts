@@ -1,0 +1,17 @@
+name: "SWELTR_inverts"
+title: "SWELTR_inverts"
+description: |
+  SWELTR_inverts
+output_dir: "docs"
+navbar:
+  title: ""
+  left:
+#   - text: "Home"
+    - icon: fa-home
+      href: index.html
+  right:
+    - text: "Abundance"
+      href: Abundance.html
+    - text: "Diversity"
+      href: Diversity.html
+output: distill::distill_article

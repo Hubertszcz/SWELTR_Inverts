@@ -1,0 +1,75 @@
+---
+title: "Diversity"
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+---
+
+## Diversity declines under warming
+
+Shannon Diversity of tropical soil and litter micro and meso fauna declines under wamred coditions, and this decline is most apparent when soil moisture levels are low, suggesting that drought and increasing temperatures threaten these important members of the soil community.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Effects Plot
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+
+soil.data <- read.csv("C:/Users/USER/Desktop/Inverts/Stats for invert project/Output data/soil.data.csv")
+
+library(vegan)
+library(ggplot2)
+library("dplyr")
+library(tidyr)
+library(lme4)
+library(car)
+library(performance)
+#library("gridExtra")   
+library(ggeffects)
+library(ggrepel)
+
+xaxis <- c(" ", " ")
+
+#linear model to test for significance
+shannon.mod <- lm(shannon ~ Avg..Soil.moisture * Plot.Type, data=soil.data,)
+
+#Calculating effects curves
+shannon.effects <- ggpredict(shannon.mod, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#plot
+ggplot(shannon.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line() + theme_minimal()+
+  labs(x = "Moisture", y = "Shannon index")+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial")) + 
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent",colour = NA),
+    plot.background = element_rect(fill = "transparent",colour = NA))
+```
+
+## violin plot
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+#plot
+ggplot(soil.data, aes(x = Plot.Type, y = shannon, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE)+
+  theme_minimal()+ labs(y= "Shannon Index", x = "")+
+  geom_boxplot(width=0.1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=2) + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.01))+
+  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 2, y = 2.8, label = "Warming < 0.05", size=20, family="Arial")+
+  #annotate("text", x = 2, y = 2.7, label = "Soil Moisture < 0.05", size=20, family="Arial")+
+  #annotate("text", x = 2, y = 2.6, label = "Warming:Soil Moisture > 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))+
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent",colour = NA),
+    plot.background = element_rect(fill = "transparent",colour = NA))
+
+```
