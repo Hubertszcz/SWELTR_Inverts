@@ -1,0 +1,156 @@
+---
+title: "initial"
+description: |
+  Reproducible workflow for 
+output:
+    distill::distill_article:
+      css: assets/styles.css
+      toc: true
+      toc_depth: 3
+---
+
+<details markdown="1">
+<summary><strong>Click here</strong> for setup information.</summary>
+
+```{r setup, message=FALSE, results = 'hide'}
+raw.data <- read.csv("Data for R.csv")
+
+#load packages
+library(vegan)
+library(ggplot2)
+library("dplyr")
+library(tidyr)
+library('funrar')
+
+## Initial cleanup, organization
+#make dates recognizable by R
+raw.data$Date<-as.Date(raw.data$Date,"%d.%m.%y")
+
+#creating column for days from start
+raw.data$Day <- raw.data$Date - as.Date("2019-12-14", "%Y-%m-%d")
+
+#adding column for total monthly precipitation (mm), based on BCI Met&Hyd Reports for 2019 and 2020
+raw.data$rain[raw.data$Date == "2019-12-14"] <- 387.6
+raw.data$rain[raw.data$Date == "2020-01-16"] <- 46.0
+raw.data$rain[raw.data$Date == "2020-02-14"] <- .5
+raw.data$rain[raw.data$Date == "2020-03-16"] <- 12.2
+raw.data$rain[raw.data$Date == "2020-05-01"] <- 257.1
+raw.data$rain[raw.data$Date == "2020-06-01"] <- 261.6
+raw.data$rain[raw.data$Date == "2020-07-01"] <- 303.3
+raw.data$rain[raw.data$Date == "2020-08-03"] <- 222.3
+raw.data$rain[raw.data$Date == "2020-09-02"] <- 237.0
+raw.data$rain[raw.data$Date == "2020-10-01"] <- 143.3
+
+#creating plot pairs
+#getting rid of letter in sample ID
+raw.data$Plot <- substr(raw.data$Sample, 1, 1)
+raw.data[grep('10',raw.data$Sample),'Plot'] <- 10
+#making plot pairs based on plot number
+raw.data[which(raw.data$Plot %in% c(1,2)),'Plot.pair'] <- 'A'
+raw.data[which(raw.data$Plot %in% c(3,4)),'Plot.pair'] <- 'B'
+raw.data[which(raw.data$Plot %in% c(5,6)),'Plot.pair'] <- 'C'
+raw.data[which(raw.data$Plot %in% c(7,8)),'Plot.pair'] <- 'D'
+raw.data[which(raw.data$Plot %in% c(9,10)),'Plot.pair'] <- 'E'
+
+#remove missing count values
+data<-raw.data[which(complete.cases(raw.data$Count)),]
+
+#removing taxa not found in either soil, nor litter
+data <- subset(data, !Taxon == "Mecoptera",)
+data <- subset(data, !Taxon == "Zygentoma",)
+data <- subset(data, !Taxon == "Embioptera",)
+data <- subset(data, !Taxon == "Archaeognatha",)
+data <- subset(data, !Taxon == "Ricinulei",)
+data <- subset(data, !Taxon == "Amphipoda",)
+data <- subset(data, !Taxon == "Euonychophora",)
+
+#create dataset with unknowns (for total abundance)
+data.unknown<-data
+
+#create dataset without unknowns (for diversity and community composition)
+data <- subset(data, !Taxon == "Unknown",)
+
+#make my data wide for vegan package
+wide.data <- data %>%
+  spread(key=Taxon,
+         value=Count)
+
+#make same wide dataframes for data with unknowns
+wide.data.unknown <- data.unknown %>%
+  spread(key=Taxon,
+         value=Count)
+```
+
+</details>
+
+After some initial cleanup and organization I have two data frames, one that includes unknown taxa (which will be used in total abundance calculations and models), and one that does not include them (for diversity and community composition calculations and models).
+
+The next steps are to calculate the dry mass of the samples and convert count data to count per 1000g dry mass. For soil this was straightforward as I have soil moisture values collected in the field right before sampling. However, due to logistical constraints imposed by the Covid-19 Pandemic I was not able to collect leaf-litter moisture values, thus leaf-litter count data is converted to count per 1000g 'wet' leaf-litter. The soil moisture values associated with the leaf-litter count data in the original data frame were measured under the leaf litter collection site immediately after collection, but are not used in the analysis. Along the way I split the data into dataframes with just count data and just environmental data - this format is required for calculating diversity indexes with the 'vegan' package.
+
+```{r, message=FALSE, results = 'hide', code_folding=TRUE}
+
+#Calculating dry mass for dataframe without unknowns
+wide.data.lit <- wide.data                                                                #backing up the real moisture values
+wide.data$Avg..Soil.moisture[wide.data$Sample.Type == "Litter"] <-0                       #setting litter moisture to 0% [so I don't mass-correct the litter]
+wide.data$Calc..dry.mass <- wide.data$Wet.Mass*((100-wide.data$Avg..Soil.moisture)/100)   #dry mass calculation
+
+wide.data.unknown.lit <- wide.data.unknown                                                                #backing up the real moisture values
+wide.data.unknown$Avg..Soil.moisture[wide.data.unknown$Sample.Type == "Litter"] <-0                       #setting litter moisture to 0% [so I don't mass-correct the litter]
+wide.data.unknown$Calc..dry.mass <- wide.data.unknown$Wet.Mass*((100-wide.data.unknown$Avg..Soil.moisture)/100)   #dry mass calculation
+
+#Splitting data frame into count and environmental data
+wide.data2<-wide.data[,-c(1:13)]     
+wide.data3<-wide.data[,-c(14:47)]
+wide.data.unknown2<-wide.data.unknown[,-c(1:13)]
+wide.data.unknown3<-wide.data.unknown[,-c(14:48)]
+
+#converting to count/1000g
+wide.data2 <- (1000/wide.data3$Calc..dry.mass)*wide.data2
+wide.data.unknown2 <- (1000/wide.data.unknown3$Calc..dry.mass)*wide.data.unknown2
+```
+
+Next I convert mass-corrected absolute abundance to relative abundance, which is used later for total abundance, individual taxon abundance, and community structure modelling. Before the conversion I create data frames backing up the mass-corrected absolute count data for diversity index calculations. 
+
+```{r, message=FALSE, results = 'hide', code_folding=TRUE}
+#Creating versions of the count data that are corrected for mass, but not made relative (for diversity indexes)
+wide.data.absolute <- wide.data2
+wide.data.unknown.absolute <- wide.data.unknown2
+
+#reincorporating, and duplicating mass-corrected absolute count data (only doing it for unknowns because this data frame will be used for abundance)
+wide.data.unknown[,c(14:48)] <- wide.data.unknown.absolute
+wide.data.unknown.absolute2 <- wide.data.unknown
+
+#converting absolute to relative abundance
+wide.data2 <- as.matrix(wide.data2)
+wide.data.unknown2 <- as.matrix(wide.data.unknown2)
+wide.data2 <- make_relative(wide.data2)
+wide.data.unknown2 <- make_relative(wide.data.unknown2)
+wide.data2 <- as.data.frame(wide.data2)
+wide.data.unknown2 <- as.data.frame(wide.data.unknown2)
+
+#reincorporating mass-corrected relative count data into original data frame
+wide.data[,c(14:47)] <- wide.data2
+wide.data.unknown[,c(14:48)] <- wide.data.unknown2
+```
+
+Finally I use the ['vegan'](https://cran.r-project.org/web/packages/vegan/index.html) package calculate richness, diversity, evenness, and total abundance, and make a summary table of these values.
+
+```{r, message=FALSE, results = 'hide', code_folding=TRUE}
+taxa <- specnumber(wide.data.absolute)                  #Tallying number of taxa
+shannon<-diversity(wide.data.absolute)                  #Shannon diversity index
+simpson<- diversity(wide.data.absolute, "simpson")      #Simpson diversity index
+J<-shannon/log(taxa)                                    #Pielou's evenness
+abundance<-rowSums(wide.data.unknown.absolute)          #total absolute abundance per 1000g (including unknowns)
+
+data.summary<-data.frame(wide.data3,taxa, abundance, J, shannon, simpson)
+```
+## Data Summary
+```{r eval=T, include=T, echo=FALSE}
+library(kableExtra)
+#library(DT)
+#options(scipen = 999)
+#datatable(data.summary, rownames = FALSE, width = "100%")
+kable(data.summary, "html") %>% kable_styling("striped") %>% scroll_box(width = "100%", height = "500px")
+```
+
+With this created I split both the summary and abundance dataframes into soil and litter data, which are analyzed separately.
