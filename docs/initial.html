@@ -9279,6 +9279,38 @@ E
 </table>
 </div>
 </div>
+<p>With this created I split both the summary and abundance data frames into soil and litter data, which are analyzed separately.</p>
+<div class="layout-chunk" data-layout="l-body">
+<details>
+<summary>
+Show code
+</summary>
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'>#splitting abundance data into soil and litter</span>
+<span class='co'>#soil abundance [only relative abundance data that includes unknowns because this is for abundance calculations, not diversity]</span>
+<span class='va'>soil.abundance</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>wide.data.unknown</span>, <span class='va'>Sample.Type</span> <span class='op'>==</span> <span class='st'>"Soil"</span>,<span class='op'>-</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>13</span><span class='op'>)</span><span class='op'>)</span>       <span class='co'>#absolute abundance</span>
+<span class='va'>soil.abundance2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>wide.data.unknown</span>, <span class='va'>Sample.Type</span> <span class='op'>==</span> <span class='st'>"Soil"</span>,<span class='op'>-</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>14</span><span class='op'>:</span><span class='fl'>46</span><span class='op'>)</span><span class='op'>)</span>     <span class='co'>#evironmental variables</span>
+
+<span class='co'>#absolute abundance for this dataset because it will be used for individual taxa abundance</span>
+<span class='va'>soil.abundance3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>wide.data.unknown.absolute2</span>, <span class='va'>Sample.Type</span> <span class='op'>==</span> <span class='st'>"Soil"</span><span class='op'>)</span>     <span class='co'>#combined datasheet, for individual taxa abundance</span>
+
+<span class='co'>#litter abundance</span>
+<span class='va'>litter.abundance</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>wide.data.unknown</span>, <span class='va'>Sample.Type</span> <span class='op'>==</span> <span class='st'>"Litter"</span>,<span class='op'>-</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>13</span><span class='op'>)</span><span class='op'>)</span>       <span class='co'>#absolute abundance</span>
+<span class='va'>litter.abundance2</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>wide.data.unknown</span>, <span class='va'>Sample.Type</span> <span class='op'>==</span> <span class='st'>"Litter"</span>,<span class='op'>-</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>14</span><span class='op'>:</span><span class='fl'>46</span><span class='op'>)</span><span class='op'>)</span>     <span class='co'>#evironmental variables</span>
+
+<span class='co'>#absolute abundance for this dataset because it will be used for individual taxa abundance</span>
+<span class='va'>litter.abundance3</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>wide.data.unknown.absolute2</span>, <span class='va'>Sample.Type</span> <span class='op'>==</span> <span class='st'>"Litter"</span><span class='op'>)</span>     <span class='co'>#combined datasheet, for individual taxa abundance</span>
+
+
+
+
+<span class='co'>#splitting diversity data into soil and litter</span>
+<span class='va'>soil.data</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>data.summary</span>, <span class='va'>Sample.Type</span> <span class='op'>==</span> <span class='st'>"Soil"</span>,<span class='op'>)</span>
+<span class='va'>litter.data</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/subset.html'>subset</a></span><span class='op'>(</span><span class='va'>data.summary</span>, <span class='va'>Sample.Type</span> <span class='op'>==</span> <span class='st'>"Litter"</span>,<span class='op'>)</span>
+</code></pre>
+</div>
+</details>
+</div>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->

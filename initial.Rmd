@@ -153,4 +153,25 @@ library(kableExtra)
 kable(data.summary, "html") %>% kable_styling("striped") %>% scroll_box(width = "100%", height = "500px")
 ```
 
-With this created I split both the summary and abundance dataframes into soil and litter data, which are analyzed separately.
+With this created I split both the summary and abundance data frames into soil and litter data, which are analyzed separately.
+
+```{r, message=FALSE, results = 'hide', code_folding=TRUE}
+#splitting abundance data into soil and litter
+#soil abundance [only relative abundance data that includes unknowns because this is for abundance calculations, not diversity]
+soil.abundance <- subset(wide.data.unknown, Sample.Type == "Soil",-c(1:13))       #absolute abundance
+soil.abundance2 <- subset(wide.data.unknown, Sample.Type == "Soil",-c(14:46))     #evironmental variables
+
+#absolute abundance for this dataset because it will be used for individual taxa abundance
+soil.abundance3 <- subset(wide.data.unknown.absolute2, Sample.Type == "Soil")     #combined datasheet, for individual taxa abundance
+
+#litter abundance
+litter.abundance <- subset(wide.data.unknown, Sample.Type == "Litter",-c(1:13))       #absolute abundance
+litter.abundance2 <- subset(wide.data.unknown, Sample.Type == "Litter",-c(14:46))     #evironmental variables
+
+#absolute abundance for this dataset because it will be used for individual taxa abundance
+litter.abundance3 <- subset(wide.data.unknown.absolute2, Sample.Type == "Litter")     #combined datasheet, for individual taxa abundance
+
+#splitting diversity data into soil and litter
+soil.data <- subset(data.summary, Sample.Type == "Soil",)
+litter.data <- subset(data.summary, Sample.Type == "Litter",)
+```
