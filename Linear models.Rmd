@@ -1,0 +1,16 @@
+---
+title: "Linear-models"
+description: |
+  Reproducible workflow for 
+output:
+    distill::distill_article:
+      css: assets/styles.css
+      toc: true
+      toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here I use data frames created in the [initial setup](initial.html) which contain mass-corrected count data as well as Shannon Diversity values calculated for each plot-date.
