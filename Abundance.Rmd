@@ -9,6 +9,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+# Soil
 
 ## Total Abundance 
 
@@ -36,11 +37,368 @@ ggplot(soil.data, aes(x=Date,y=abundance, fill=Plot.Type)) + geom_boxplot(size=1
     legend.margin = margin(3, 3, 3, 3))
 ```
 
-
-## Abundance differences based on trophic level
+## Insects
 
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
 soil.abundance3 <- read.csv("C:/Users/USER/Desktop/Inverts/Stats for invert project/Output data/soil.abundance3.csv")
+
+library(vegan)
+library(ggplot2)
+library("dplyr")
+library(tidyr)
+library(lme4)
+library(car)
+require(glmmTMB)
+require(DHARMa)
+library("gridExtra")  
+library(grid)
+library(ggeffects)
+
+xaxis <- c(" ", " ")
+
+```
+
+
+### Hymenoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+
+Hymenoptera <- glm(Hymenoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Hymenoptera.effects <- ggpredict(Hymenoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Hymenoptera.effects.plot <- ggplot(Hymenoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Hymenoptera.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Hymenoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + 
+  #stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 332, label = "Warming > 0.05", size=20, family="Arial")+   
+  #annotate("text", x = 1, y = 320, label = "Soil Moisture < 0.05", size=20, family="Arial")+   
+  #annotate("text", x = 1, y = 308, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Hymenoptera.violin.plot, Hymenoptera.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+### Coleoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Coleoptera <- glm(Coleoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Coleoptera.effects <- ggpredict(Coleoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Coleoptera.effects.plot <- ggplot(Coleoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Coleoptera.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Coleoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + 
+  #stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 37.5, label = "Warming < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 36, label = "Soil Moisture < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 34.5, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Coleoptera.violin.plot, Coleoptera.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+### Hemiptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Hemiptera <- glm(Hemiptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Hemiptera.effects <- ggpredict(Hemiptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Hemiptera.effects.plot <- ggplot(Hemiptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Hemiptera.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Hemiptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + 
+  #stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 148, label = "Warming < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 1, y = 140, label = "Soil Moisture < 0.05", size=20, family="Arial")+   
+  #annotate("text", x = 1, y = 133, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Hemiptera.violin.plot, Hemiptera.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+### Diptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Diptera <- glm(Diptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Diptera.effects <- ggpredict(Diptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Diptera.effects.plot <- ggplot(Diptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Diptera.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Diptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + 
+  #stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 2, y = 41.5, label = "Warming < 0.05", size=20, family="Arial")+
+  #annotate("text", x = 2, y = 40, label = "Soil Moisture < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 2, y = 38.5, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Diptera.violin.plot, Diptera.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+### Blattodea   
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Blattodea <- glm(Blattodea ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Blattodea.effects <- ggpredict(Blattodea, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Blattodea.effects.plot <- ggplot(Blattodea.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Blattodea.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Blattodea, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + 
+  #stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 33.5, label = "Warming < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 32, label = "Soil Moisture < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 30.5, label = "Warming:Soil Moisture > 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Blattodea.violin.plot, Blattodea.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+### Thysanoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Thysanoptera <- glm(Thysanoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Thysanoptera.effects <- ggpredict(Thysanoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Thysanoptera.effects.plot <- ggplot(Thysanoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Thysanoptera.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Thysanoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + 
+  #stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 2, y = 6.8, label = "Warming > 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 2, y = 6.5, label = "Soil Moisture < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 2, y = 6.2, label = "Warming:Soil Moisture > 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Thysanoptera.violin.plot, Thysanoptera.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+###   Psocoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Psocoptera <- glm(Psocoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Psocoptera.effects <- ggpredict(Psocoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+
+#effects plot
+Psocoptera.effects.plot <- ggplot(Psocoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Psocoptera.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Psocoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + 
+  #stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 3.8, label = "Warming > 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 1, y = 3.6, label = "Soil Moisture > 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 1, y = 3.4, label = "Warming:Soil Moisture > 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Psocoptera.violin.plot, Psocoptera.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+###   Lepidoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Lepidoptera <- glm(Lepidoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Lepidoptera.effects <- ggpredict(Lepidoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+
+#effects plot
+Lepidoptera.effects.plot <- ggplot(Lepidoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Lepidoptera.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Lepidoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + 
+  #stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 2, y = 18, label = "Warming > 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 2, y = 17, label = "Soil Moisture < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 2, y = 16, label = "Warming:Soil Moisture > 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Lepidoptera.violin.plot, Lepidoptera.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+
+### Fungivores
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+
+Fungivores <- glm(Fungivores ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Fungivores.effects <- ggpredict(Fungivores, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Fungivores.effects.plot <- ggplot(Fungivores.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Fungivores.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Fungivores, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1) + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 410, label = "Warming < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 390, label = "Soil Moisture < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 370, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Fungivores.violin.plot, Fungivores.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+
+### Herbivores
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+
+Herbivores <- glm(Herbivores ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Herbivores.effects <- ggpredict(Herbivores, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Herbivores.effects.plot <- ggplot(Herbivores.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Herbivores.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Herbivores, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1) + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 147, label = "Warming < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 140, label = "Soil Moisture < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 133, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Herbivores.violin.plot, Herbivores.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+```
+
+### Predators
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+
+Predators <- glm(Predators ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
+
+Predators.effects <- ggpredict(Predators, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Predators.effects.plot <- ggplot(Predators.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Predators.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Predators, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1) + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 330, label = "Warming > 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 315, label = "Soil Moisture < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 1, y = 300, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Predators.violin.plot, Predators.effects.plot, ncol = 2, top = grid::textGrob("", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+
+```
+
+# Litter
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+litter.abundance3 <- read.csv("C:/Users/USER/Desktop/Inverts/Stats for invert project/Output data/soil.abundance3.csv")
 
 library(vegan)
 library(ggplot2)
@@ -59,128 +417,355 @@ xaxis <- c(" ", " ")
 
 ```
 
+## Insects
 
-### Detritivores
+### Hymenoptera
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Hymenoptera <- glm(Hymenoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
 
-Detritivores <- glm(Decomposers ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
-
-Detritivores.effects <- ggpredict(Detritivores, terms = c("Avg..Soil.moisture", "Plot.Type"))
-
+Hymenoptera.effects <- ggpredict(Hymenoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
 
 #effects plot
-Detritivores.effects.plot <- ggplot(Detritivores.effects, aes(x = x, y = predicted, colour = group)) +
+Hymenoptera.effects.plot <- ggplot(Hymenoptera.effects, aes(x = x, y = predicted, colour = group)) +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
   geom_line(size=1.5) + theme_minimal()+
-  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
-  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
   theme(text=element_text(family="Arial"))
 
 #violin plot
-Detritivores.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Decomposers, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
-  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+Hymenoptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Hymenoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
   geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
-  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1) + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
-  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
   scale_x_discrete(labels= xaxis) +
-  #annotate("text", x = 2, y = 68, label = "Warming > 0.05", size=20, family="Arial")+
-  #annotate("text", x = 2, y = 65, label = "Soil Moisture < 0.05", size=20, family="Arial")+
-  #annotate("text", x = 2, y = 62, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  #annotate("text", x = 2, y = 2100, label = "Warming < 0.05", size=20, family="Arial")+   
+  #annotate("text", x = 2, y = 2000, label = "Soil moisture < 0.05", size=20, family="Arial")+   
+  #annotate("text", x = 2, y = 1900, label = "Warming:Soil moisture < 0.05", size=20, family="Arial")+
   theme(text=element_text(family="Arial"))
 
-grid.arrange(Detritivores.violin.plot, Detritivores.effects.plot, ncol = 2, top = grid::textGrob("Detritivores", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+#creating jpg of violin + effects plot
+jpeg("litter_Hymenoptera.jpg", width = 5000, height = 2244, units = "px", pointsize = 12,)
+
+grid.arrange(Hymenoptera.violin.plot, Hymenoptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
 ```
 
-
-### Fungivores
+### Coleoptera
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Coleoptera <- glm(Coleoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
 
-Fungivores <- glm(Fungivores ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
-
-Fungivores.effects <- ggpredict(Fungivores, terms = c("Avg..Soil.moisture", "Plot.Type"))
+Coleoptera.effects <- ggpredict(Coleoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
 
 #effects plot
-Fungivores.effects.plot <- ggplot(Fungivores.effects, aes(x = x, y = predicted, colour = group)) +
+Coleoptera.effects.plot <- ggplot(Coleoptera.effects, aes(x = x, y = predicted, colour = group)) +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
   geom_line(size=1.5) + theme_minimal()+
-  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
-  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
   theme(text=element_text(family="Arial"))
 
 #violin plot
-Fungivores.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Fungivores, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
-  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+Coleoptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Coleoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
   geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
-  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1) + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
-  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
   scale_x_discrete(labels= xaxis) +
-  #annotate("text", x = 1, y = 410, label = "Warming < 0.05", size=20, family="Arial")+ 
-  #annotate("text", x = 1, y = 390, label = "Soil Moisture < 0.05", size=20, family="Arial")+ 
-  #annotate("text", x = 1, y = 370, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  #annotate("text", x = 2, y = 460, label = "Warming < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 2, y = 445, label = "Soil moisture < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 2, y = 430, label = "Warming:Soil moisture < 0.05", size=20, family="Arial")+
   theme(text=element_text(family="Arial"))
 
-grid.arrange(Fungivores.violin.plot, Fungivores.effects.plot, ncol = 2, top = grid::textGrob("Fungivores", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+grid.arrange(Coleoptera.violin.plot, Coleoptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
 ```
 
-
-### Herbivores
+### Hemiptera
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Hemiptera <- glm(Hemiptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
 
-Herbivores <- glm(Herbivores ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
-
-Herbivores.effects <- ggpredict(Herbivores, terms = c("Avg..Soil.moisture", "Plot.Type"))
+Hemiptera.effects <- ggpredict(Hemiptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
 
 #effects plot
-Herbivores.effects.plot <- ggplot(Herbivores.effects, aes(x = x, y = predicted, colour = group)) +
+Hemiptera.effects.plot <- ggplot(Hemiptera.effects, aes(x = x, y = predicted, colour = group)) +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
   geom_line(size=1.5) + theme_minimal()+
-  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
-  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
   theme(text=element_text(family="Arial"))
 
 #violin plot
-Herbivores.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Herbivores, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
-  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+Hemiptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Hemiptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
   geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
-  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1) + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
-  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
   scale_x_discrete(labels= xaxis) +
-  #annotate("text", x = 1, y = 147, label = "Warming < 0.05", size=20, family="Arial")+ 
-  #annotate("text", x = 1, y = 140, label = "Soil Moisture < 0.05", size=20, family="Arial")+ 
-  #annotate("text", x = 1, y = 133, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  #annotate("text", x = 2, y = 230, label = "Warming < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 2, y = 220, label = "Soil moisture < 0.05", size=20, family="Arial")+   
+  #annotate("text", x = 2, y = 210, label = "Warming:Soil moisture > 0.05", size=20, family="Arial")+
   theme(text=element_text(family="Arial"))
 
-grid.arrange(Herbivores.violin.plot, Herbivores.effects.plot, ncol = 2, top = grid::textGrob("Herbivores", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
+grid.arrange(Hemiptera.violin.plot, Hemiptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
 ```
 
-### Predators
+### Diptera
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Diptera <- glm(Diptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
 
-Predators <- glm(Predators ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.abundance3)
-
-Predators.effects <- ggpredict(Predators, terms = c("Avg..Soil.moisture", "Plot.Type"))
+Diptera.effects <- ggpredict(Diptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
 
 #effects plot
-Predators.effects.plot <- ggplot(Predators.effects, aes(x = x, y = predicted, colour = group)) +
+Diptera.effects.plot <- ggplot(Diptera.effects, aes(x = x, y = predicted, colour = group)) +
   geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
   geom_line(size=1.5) + theme_minimal()+
-  labs(x = "% Moisture", y = expression(paste("Pred count ", (kg^-1))), size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
-  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
   theme(text=element_text(family="Arial"))
 
 #violin plot
-Predators.violin.plot <- ggplot(soil.abundance3, aes(x = Plot.Type, y = Predators, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
-  theme_minimal()+ labs(y= expression(paste("count ", (kg^-1))), x = "")+
+Diptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Diptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
   geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
-  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1) + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
-  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
   scale_x_discrete(labels= xaxis) +
-  #annotate("text", x = 1, y = 330, label = "Warming > 0.05", size=20, family="Arial")+ 
-  #annotate("text", x = 1, y = 315, label = "Soil Moisture < 0.05", size=20, family="Arial")+  
-  #annotate("text", x = 1, y = 300, label = "Warming:Soil Moisture < 0.05", size=20, family="Arial")+
+  #annotate("text", x = 1, y = 415, label = "Warming > 0.05", size=20, family="Arial")+
+  #annotate("text", x = 1, y = 400, label = "Soil moisture < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 1, y = 385, label = "Warming:Soil moisture < 0.05", size=20, family="Arial")+
   theme(text=element_text(family="Arial"))
 
-grid.arrange(Predators.violin.plot, Predators.effects.plot, ncol = 2, top = grid::textGrob("Predators", x = 0, hjust = 0, gp=gpar(fontfamily="Arial")))
-
+grid.arrange(Diptera.violin.plot, Diptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
 ```
 
+### Blattodea
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Blattodea <- glm(Blattodea ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
+
+Blattodea.effects <- ggpredict(Blattodea, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Blattodea.effects.plot <- ggplot(Blattodea.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Blattodea.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Blattodea, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 360, label = "Warming < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 345, label = "Soil moisture < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 330, label = "Warming:Soil moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Blattodea.violin.plot, Blattodea.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
+```
+
+### Thysanoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Thysanoptera <- glm(Thysanoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
+
+Thysanoptera.effects <- ggpredict(Thysanoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Thysanoptera.effects.plot <- ggplot(Thysanoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Thysanoptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Thysanoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 430, label = "Warming < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 1, y = 410, label = "Soil moisture < 0.05", size=20, family="Arial")+ 
+  #annotate("text", x = 1, y = 390, label = "Warming:Soil moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Thysanoptera.violin.plot, Thysanoptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
+```
+
+### Psocoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Psocoptera <- glm(Psocoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
+
+Psocoptera.effects <- ggpredict(Psocoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Psocoptera.effects.plot <- ggplot(Psocoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Psocoptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Psocoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 2, y = 365, label = "Warming < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 2, y = 345, label = "Soil moisture < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 2, y = 325, label = "Warming:Soil moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Psocoptera.violin.plot, Psocoptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
+```
+
+### Lepidoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Lepidoptera <- glm(Lepidoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
+
+Lepidoptera.effects <- ggpredict(Lepidoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Lepidoptera.effects.plot <- ggplot(Lepidoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Lepidoptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Lepidoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 1, y = 40, label = "Warming < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 1, y = 38, label = "Soil moisture < 0.05", size=20, family="Arial")+  
+  #annotate("text", x = 1, y = 36, label = "Warming:Soil moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Lepidoptera.violin.plot, Lepidoptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
+```
+
+### Orthoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Orthoptera <- glm(Orthoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
+
+Orthoptera.effects <- ggpredict(Orthoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Orthoptera.effects.plot <- ggplot(Orthoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Orthoptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Orthoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 2, y = 10.2, label = "Warming > 0.05", size=20, family="Arial")+
+    #annotate("text", x = 2, y = 9.5, label = "Soil moisture > 0.05", size=20, family="Arial")+
+    #annotate("text", x = 2, y = 8.8, label = "Warming:Soil moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Orthoptera.violin.plot, Orthoptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
+```
+
+### Trichoptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Trichoptera <- glm(Trichoptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
+
+Trichoptera.effects <- ggpredict(Trichoptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Trichoptera.effects.plot <- ggplot(Trichoptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Trichoptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Trichoptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 2, y = 68, label = "Warming < 0.05", size=20, family="Arial")+ 
+    #annotate("text", x = 2, y = 65, label = "Soil moisture < 0.05", size=20, family="Arial")+ 
+    #annotate("text", x = 2, y = 62, label = "Warming:Soil moisture > 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Trichoptera.violin.plot, Trichoptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
+```
+
+### Neuroptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Neuroptera <- glm(Neuroptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
+
+Neuroptera.effects <- ggpredict(Neuroptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Neuroptera.effects.plot <- ggplot(Neuroptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Neuroptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Neuroptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 2, y = 10, label = "Warming < 0.05", size=20, family="Arial")+ 
+    #annotate("text", x = 2, y = 9.5, label = "Soil moisture < 0.05", size=20, family="Arial")+   
+    #annotate("text", x = 2, y = 9, label = "Warming:Soil moisture < 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Neuroptera.violin.plot, Neuroptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
+```
+
+### Zoraptera
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+Zoraptera <- glm(Zoraptera ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=litter.abundance3)
+
+Zoraptera.effects <- ggpredict(Zoraptera, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+#effects plot
+Zoraptera.effects.plot <- ggplot(Zoraptera.effects, aes(x = x, y = predicted, colour = group)) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .1) +
+  geom_line(size=1.5) + theme_minimal()+
+  labs(x = "Moisture", y = "Predicted count/1000g dry litter", size=10)+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial"))
+
+#violin plot
+Zoraptera.violin.plot <- ggplot(litter.abundance3, aes(x = Plot.Type, y = Zoraptera, color = Plot.Type, group = Plot.Type)) + geom_violin(trim=FALSE, size=1)+
+  theme_minimal()+ labs(y= "Count/1000g dry litter", x = "")+
+  geom_boxplot(width=0.1, size=1) + scale_color_hue(direction = -1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point", size=1, colour = "black") + stat_summary(fun.data = mean_se, geom = "errorbar", aes(width=.02, size=.5))+
+  theme(legend.position="none",legend.text=element_text(size=10),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  #annotate("text", x = 2, y = 8.5, label = "Warming < 0.05", size=20, family="Arial")+
+    #annotate("text", x = 2, y = 8, label = "Soil moisture > 0.05", size=20, family="Arial")+  
+    #annotate("text", x = 2, y = 7.5, label = "Warming:Soil moisture > 0.05", size=20, family="Arial")+
+  theme(text=element_text(family="Arial"))
+
+grid.arrange(Zoraptera.violin.plot, Zoraptera.effects.plot, ncol = 2, top = textGrob("",gp=gpar(fontfamily="Arial")))
+```
