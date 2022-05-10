@@ -9,8 +9,55 @@ output:
       toc_depth: 3
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+Here I use data frames created in the [initial setup](initial.html) which contain mass-corrected count data as well as Shannon Diversity values calculated for each plot-date. Soil and leaf-litter data are treated similarly, though run seperately. First I start with soil:
+
+<details markdown="1">
+<summary><strong>Click here</strong> for setup information.</summary>
+
+```{r setup, message=FALSE, results = 'hide'}
+soil.abundance <- read.csv("C:/Users/USER/Desktop/Inverts/Stats for invert project/Output data/soil.abundance.csv")
+soil.abundance2 <- read.csv("C:/Users/USER/Desktop/Inverts/Stats for invert project/Output data/soil.abundance2.csv")
+soil.data <- read.csv("C:/Users/USER/Desktop/Inverts/Stats for invert project/Output data/soil.data.csv")
+
+library(ggeffects)
+library(lme4)
+library(ggplot2)
+
+xaxis <- c(" ", " ")
+```
+</details>
+
+# Shannon Diversity
+
+To find the right linear model we started by testing models that paired plot type with date, day from start, season, and soil moisture as fixed effects and Plot.pair as a random effect using the lmer() function from the package lme4. 
+
+```{r, message=FALSE, results = 'hide'}
+#date and plot type
+model1 <- lmer(shannon ~ Date * Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model2 <- lmer(shannon ~ Date + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model3 <- lmer(shannon ~ Date + Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model4 <- lmer(shannon ~ Date:Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model5 <- lmer(shannon ~ Date + Plot.Type + Date:Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)      #should be same as model1
+
+#day from start instead of date
+model6 <- lmer(shannon ~ Day + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model7 <- lmer(shannon ~ Day + Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model8 <- lmer(shannon ~ Day:Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model9 <- lmer(shannon ~ Day*Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+
+
+#season and plot type
+model10 <- lmer(shannon ~ Season + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model11 <- lmer(shannon ~ Season + Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model12 <- lmer(shannon ~ Season:Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model13 <- lmer(shannon ~ Season * Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+
+#moisture and plot type
+model14 <- lmer(shannon ~ Avg..Soil.moisture + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model15 <- lmer(shannon ~ Avg..Soil.moisture + Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model16 <- lmer(shannon ~ Avg..Soil.moisture:Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+model17 <- lmer(shannon ~ Avg..Soil.moisture * Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
+
 ```
 
-Here I use data frames created in the [initial setup](initial.html) which contain mass-corrected count data as well as Shannon Diversity values calculated for each plot-date.
+I tested and compared models using...
