@@ -9,6 +9,14 @@ output:
       toc_depth: 3
 ---
 
+Here is a .csv file with raw data. This can also be found in the github source code for this website:
+
+```{r echo=FALSE}
+# a single file
+xfun::embed_file('Data for R.csv')
+```
+
+
 <details markdown="1">
 <summary><strong>Click here</strong> for setup information.</summary>
 

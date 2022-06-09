@@ -17,7 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Effects Plot
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
 
-soil.data <- read.csv("C:/Users/USER/Desktop/Inverts/Stats for invert project/Output data/soil.data.csv")
+soil.data <- read.csv("soil.data.csv")
 
 library(vegan)
 library(ggplot2)
