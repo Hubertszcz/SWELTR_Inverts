@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Total Abundance 
 
+Contrary to finding from higher lattitude warming experiments, total soil and litter fauna in the warmed plots was actually greater than in control plots.
+
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
 library(vegan)
 library(ggplot2)
@@ -36,6 +38,8 @@ ggplot(soil.data, aes(x=Date,y=abundance, fill=Plot.Type)) + geom_boxplot(size=1
     legend.box.just = "right",
     legend.margin = margin(3, 3, 3, 3))
 ```
+
+While most taxa decreased in abundance, a few (notably Oribatida, the most abundant taxon), increased on warmed plots. See trends for individual taxa here:
 
 ## Insects
 

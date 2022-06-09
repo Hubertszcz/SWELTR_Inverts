@@ -2139,14 +2139,15 @@ Workflows
 <nav class="l-text toc figcaption" id="TOC">
 <h3>Contents</h3>
 <ul>
+<li><a href="#total-abundance">Total Abundance</a></li>
 <li><a href="#shannon-diversity">Shannon Diversity</a></li>
 </ul>
 </nav>
 </div>
-<p>Here I use data frames created in the <a href="initial.html">initial
+<p>Here we use data frames created in the <a href="initial.html">initial
 setup</a> which contain mass-corrected count data as well as Shannon
 Diversity values calculated for each plot-date. Soil and leaf-litter
-data are treated similarly, though run seperately. First I start with
+data are treated similarly, though run seperately. First we start with
 soil:</p>
 <details>
 <summary>
@@ -2161,12 +2162,50 @@ soil:</p>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://strengejacke.github.io/ggeffects/'>ggeffects</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/lme4/lme4/'>lme4</a></span><span class='op'>)</span>
 <span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://scales.r-lib.org'>scales</a></span><span class='op'>)</span> 
 
 <span class='va'>xaxis</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>" "</span>, <span class='st'>" "</span><span class='op'>)</span>
 </code></pre>
 </div>
 </div>
 </details>
+<h1 id="total-abundance">Total Abundance</h1>
+<p>We started with the following model:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='co'>#moisture and plot type, log distribution</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/glmmTMB/glmmTMB'>glmmTMB</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='va'><a href='http://florianhartig.github.io/DHARMa/'>DHARMa</a></span><span class='op'>)</span>
+<span class='kw'><a href='https://rdrr.io/r/base/library.html'>require</a></span><span class='op'>(</span><span class='va'><a href='https://r-forge.r-project.org/projects/car/'>car</a></span><span class='op'>)</span>
+
+<span class='va'>abundance.mod</span> <span class='op'>&lt;-</span><span class='fu'><a href='https://rdrr.io/pkg/glmmTMB/man/glmmTMB.html'>glmmTMB</a></span><span class='op'>(</span><span class='va'>integer.abundance</span><span class='op'>~</span><span class='va'>Avg..Soil.moisture</span><span class='op'>*</span><span class='va'>Plot.Type</span><span class='op'>+</span><span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>Plot.pair</span><span class='op'>)</span>,
+                        data<span class='op'>=</span><span class='va'>soil.data</span>,
+                        ziformula<span class='op'>=</span><span class='op'>~</span><span class='fl'>0</span>,
+                        family<span class='op'>=</span><span class='fu'><a href='https://rdrr.io/pkg/glmmTMB/man/nbinom2.html'>nbinom2</a></span><span class='op'>(</span>link<span class='op'>=</span><span class='st'>"log"</span><span class='op'>)</span><span class='op'>)</span>   <span class='co'>#this could be poisson or various other distributions</span>
+<span class='va'>abundance.resids</span><span class='op'>&lt;-</span><span class='fu'><a href='https://rdrr.io/pkg/DHARMa/man/simulateResiduals.html'>simulateResiduals</a></span><span class='op'>(</span><span class='va'>abundance.mod</span><span class='op'>)</span>
+<span class='va'>abundance.resid.plot</span><span class='op'>&lt;-</span><span class='fu'><a href='https://strengejacke.github.io/ggeffects/reference/plot.html'>plot</a></span><span class='op'>(</span><span class='va'>abundance.resids</span><span class='op'>)</span>
+</code></pre>
+</div>
+<p><img src="Linear-models_files/figure-html5/unnamed-chunk-1-1.png" width="624" /></p>
+</div>
+But ended up using this one:
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>abundance.mod</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/glm.html'>glm</a></span><span class='op'>(</span><span class='va'>integer.abundance</span> <span class='op'>~</span> <span class='va'>Avg..Soil.moisture</span> <span class='op'>*</span> <span class='va'>Plot.Type</span>, family <span class='op'>=</span> <span class='va'>poisson</span>, data<span class='op'>=</span><span class='va'>soil.data</span><span class='op'>)</span>
+</code></pre>
+</div>
+</div>
+<p>We visualized the difference in total abundance between warmed and
+control plots using box plots with violins to show distribution of
+data:</p>
+<div class="layout-chunk" data-layout="l-body">
+<p><img src="Linear-models_files/figure-html5/unnamed-chunk-3-1.png" width="624" /></p>
+</div>
+<p>We visualized the interaction of the warming and moisture effects
+using an effects plot:</p>
+<div class="layout-chunk" data-layout="l-body">
+<p><img src="Linear-models_files/figure-html5/unnamed-chunk-4-1.png" width="624" /></p>
+</div>
 <h1 id="shannon-diversity">Shannon Diversity</h1>
 <p>To find the right linear model we started by testing models that
 paired plot type with date, day from start, season, and soil moisture as
@@ -2199,10 +2238,23 @@ from the package lme4.</p>
 <span class='va'>model15</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='va'>shannon</span> <span class='op'>~</span> <span class='va'>Avg..Soil.moisture</span> <span class='op'>+</span> <span class='va'>Plot.Type</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>Plot.pair</span><span class='op'>)</span>, REML <span class='op'>=</span> <span class='cn'>FALSE</span>, data<span class='op'>=</span><span class='va'>soil.data</span>,<span class='op'>)</span>
 <span class='va'>model16</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='va'>shannon</span> <span class='op'>~</span> <span class='va'>Avg..Soil.moisture</span><span class='op'>:</span><span class='va'>Plot.Type</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>Plot.pair</span><span class='op'>)</span>, REML <span class='op'>=</span> <span class='cn'>FALSE</span>, data<span class='op'>=</span><span class='va'>soil.data</span>,<span class='op'>)</span>
 <span class='va'>model17</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/lme4/man/lmer.html'>lmer</a></span><span class='op'>(</span><span class='va'>shannon</span> <span class='op'>~</span> <span class='va'>Avg..Soil.moisture</span> <span class='op'>*</span> <span class='va'>Plot.Type</span> <span class='op'>+</span> <span class='op'>(</span><span class='fl'>1</span><span class='op'>|</span><span class='va'>Plot.pair</span><span class='op'>)</span>, REML <span class='op'>=</span> <span class='cn'>FALSE</span>, data<span class='op'>=</span><span class='va'>soil.data</span>,<span class='op'>)</span>
+
+<span class='co'>#to avoid overfitting, need a simpler model...</span>
 </code></pre>
 </div>
 </div>
-<p>I tested and compared models using…</p>
+<p>[I don’t remember how we got from the various tests and experiments
+of models to the final one we used. I have a draft R script documenting
+the original tests (shown above), but these are all with the lmer()
+function, rather than lm() which we use in the final model.]</p>
+<p>I tested and compared models using the Akaike information criterion
+(AIC), and ultimately chose the following structure:</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span class='va'>shannon.mod</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/stats/lm.html'>lm</a></span><span class='op'>(</span><span class='va'>shannon</span> <span class='op'>~</span> <span class='va'>Avg..Soil.moisture</span> <span class='op'>*</span> <span class='va'>Plot.Type</span>, data<span class='op'>=</span><span class='va'>soil.data</span>,<span class='op'>)</span>
+</code></pre>
+</div>
+</div>
 <div class="sourceCode" id="cb1"><pre
 class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->

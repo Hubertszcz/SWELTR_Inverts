@@ -9,7 +9,7 @@ output:
       toc_depth: 3
 ---
 
-Here I use data frames created in the [initial setup](initial.html) which contain mass-corrected count data as well as Shannon Diversity values calculated for each plot-date. Soil and leaf-litter data are treated similarly, though run seperately. First I start with soil:
+Here we use data frames created in the [initial setup](initial.html) which contain mass-corrected count data as well as Shannon Diversity values calculated for each plot-date. Soil and leaf-litter data are treated similarly, though run seperately. First we start with soil:
 
 <details markdown="1">
 <summary><strong>Click here</strong> for setup information.</summary>
@@ -22,10 +22,128 @@ soil.data <- read.csv("soil.data.csv")
 library(ggeffects)
 library(lme4)
 library(ggplot2)
+library(scales) 
 
 xaxis <- c(" ", " ")
 ```
 </details>
+
+# Total Abundance
+
+We started with the following model:
+
+```{r, message=FALSE, results = 'hide'}
+
+#moisture and plot type, log distribution
+require(glmmTMB)
+require(DHARMa)
+require(car)
+
+abundance.mod <-glmmTMB(integer.abundance~Avg..Soil.moisture*Plot.Type+(1|Plot.pair),
+                        data=soil.data,
+                        ziformula=~0,
+                        family=nbinom2(link="log"))	 #this could be poisson or various other distributions
+abundance.resids<-simulateResiduals(abundance.mod)
+abundance.resid.plot<-plot(abundance.resids)
+```
+
+But ended up using this one:
+```{r, message=FALSE, results = 'hide'}
+abundance.mod <- glm(integer.abundance ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.data)
+```
+
+We visualized the difference in total abundance between warmed and control plots using box plots with violins to show distribution of data:
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+ggplot(soil.data, aes(x = Plot.Type, y = abundance, color = Plot.Type, group = Plot.Type)) + 
+  scale_fill_manual(values = c("royalblue1", "tomato1")) + scale_color_manual(values = c("royalblue1", "tomato1")) +
+  geom_violin(trim=FALSE)+  theme_minimal()+ labs(y= "Total abundance", x = "")+ geom_boxplot(size=0.1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point") + stat_summary(fun.data = mean_se, geom = "errorbar", aes())+
+  theme(legend.position="none",legend.text=element_text(),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  theme(text=element_text(family="Arial")) + 
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent",colour = NA),
+    plot.background = element_rect(fill = "transparent",colour = NA))+
+  scale_y_continuous(labels=comma)+
+    theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+
+```
+
+We visualized the interaction of the warming and moisture effects using an effects plot:
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+abundance.effects <- ggpredict(abundance.mod, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+ggplot(abundance.effects, aes(x = x, y = predicted, colour = group)) + 
+  scale_fill_manual(values = c("tomato1","royalblue1")) + scale_color_manual(values = c("tomato1","royalblue1")) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .2) +
+  geom_line() + theme_minimal()+
+  labs(x = "Soil moisture (%)", y = "Total abundance")+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial")) + 
+  theme(axis.title.y = element_text(margin=margin(r=60)), axis.title.x = element_text(margin=margin(t=20))) + 
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent",colour = NA),
+    plot.background = element_rect(fill = "transparent",colour = NA))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+```
+
+# Taxonomic Richness
+
+We also used a generalized linear model with a Poisson distribution for Taxonomic Richness (the number of distinct taxonomic units, generally at Order level, found in each plot on each collection date).
+
+taxa.mod <- glm(taxa ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.data)
+
+Violin plot:
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+ggplot(soil.data, aes(x = Plot.Type, y = taxa, color = Plot.Type, group = Plot.Type)) + 
+  scale_fill_manual(values = c("royalblue1", "tomato1")) + scale_color_manual(values = c("royalblue1", "tomato1")) +
+  geom_violin(trim=FALSE)+  theme_minimal()+ labs(y= "Total abundance", x = "")+ geom_boxplot(size=0.1) +
+  theme(plot.title = element_text(hjust = 0.5)) + stat_summary(fun=mean, geom="point") + stat_summary(fun.data = mean_se, geom = "errorbar", aes())+
+  theme(legend.position="none",legend.text=element_text(),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  scale_x_discrete(labels= xaxis) +
+  theme(text=element_text(family="Arial")) + 
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent",colour = NA),
+    plot.background = element_rect(fill = "transparent",colour = NA))+
+  scale_y_continuous(labels=comma)+
+    theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+
+```
+
+Effects plot:
+
+```{r, echo=FALSE, message = FALSE, warning = FALSE}
+taxa.effects <- ggpredict(taxa.mod, terms = c("Avg..Soil.moisture", "Plot.Type"))
+
+ggplot(taxa.effects, aes(x = x, y = predicted, colour = group)) + 
+  scale_fill_manual(values = c("tomato1","royalblue1")) + scale_color_manual(values = c("tomato1","royalblue1")) +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill=group), alpha = .2) +
+  geom_line() + theme_minimal()+
+  labs(x = "Soil moisture (%)", y = "Total abundance")+ theme(plot.title = element_text(hjust = 0.5)) + 
+  theme(legend.position="none",legend.text=element_text(size=15),legend.direction='horizontal',plot.title = element_text(hjust=0.5),text=element_text(family="Arial"))+
+  theme(text=element_text(family="Arial")) + 
+  theme(axis.title.y = element_text(margin=margin(r=60)), axis.title.x = element_text(margin=margin(t=20))) + 
+  theme(
+    panel.grid.major = element_blank(), 
+    panel.grid.minor = element_blank(),
+    panel.background = element_rect(fill = "transparent",colour = NA),
+    plot.background = element_rect(fill = "transparent",colour = NA))+
+  theme(axis.line.x = element_line(color="black"),
+        axis.line.y = element_line(color="black"))
+
+```
 
 # Shannon Diversity
 
@@ -58,6 +176,15 @@ model15 <- lmer(shannon ~ Avg..Soil.moisture + Plot.Type + (1|Plot.pair), REML =
 model16 <- lmer(shannon ~ Avg..Soil.moisture:Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
 model17 <- lmer(shannon ~ Avg..Soil.moisture * Plot.Type + (1|Plot.pair), REML = FALSE, data=soil.data,)
 
+#to avoid overfitting, need a simpler model...
+
+
 ```
 
-I tested and compared models using the Akaike information criterion (AIC), and ultimately chose model
+[I don't remember how we got from the various tests and experiments of models to the final one we used. I have a draft R script documenting the original tests (shown above), but these are all with the lmer() function, rather than lm() which we use in the final model.]
+
+I tested and compared models using the Akaike information criterion (AIC), and ultimately chose the following structure: 
+
+```{r, message=TRUE, results = 'show'}
+shannon.mod <- lm(shannon ~ Avg..Soil.moisture * Plot.Type, data=soil.data,)
+```
