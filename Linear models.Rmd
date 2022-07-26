@@ -99,11 +99,12 @@ ggplot(abundance.effects, aes(x = x, y = predicted, colour = group)) +
 
 We also used a generalized linear model with a Poisson distribution for Taxonomic Richness (the number of distinct taxonomic units, generally at Order level, found in each plot on each collection date).
 
-taxa.mod <- glm(taxa ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.data)
 
 Violin plot:
 
 ```{r, echo=FALSE, message = FALSE, warning = FALSE}
+taxa.mod <- glm(taxa ~ Avg..Soil.moisture * Plot.Type, family = poisson, data=soil.data)
+
 ggplot(soil.data, aes(x = Plot.Type, y = taxa, color = Plot.Type, group = Plot.Type)) + 
   scale_fill_manual(values = c("royalblue1", "tomato1")) + scale_color_manual(values = c("royalblue1", "tomato1")) +
   geom_violin(trim=FALSE)+  theme_minimal()+ labs(y= "Total abundance", x = "")+ geom_boxplot(size=0.1) +
